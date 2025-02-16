@@ -1,4 +1,9 @@
+import { DateRange } from '../value__objects/date_range';
+import { Booking } from './booking';
+
 export class Property {
+  private readonly bookings: Booking[] = [];
+
   constructor(
     private id: string,
     private name: string,
@@ -44,5 +49,30 @@ export class Property {
     if (guestCount > this.maxGuests) {
       throw new Error(`O número de hóspedes foi execedido máximo permitido ${this.maxGuests}.`);
     }
+  }
+
+  calculateTotalPrice(dateRange: DateRange): number {
+    const totalNights = dateRange.getTotalNights();
+    let totalPrice = totalNights * this.basePricePerNight;
+    if (totalNights > 7) {
+      totalPrice *= 0.9;
+    }
+    return totalPrice;
+  }
+
+  isAvalable(dateRange: DateRange): boolean {
+    return !this.bookings.some((booking) => {
+      return booking.getStatus() == 'CONFIRMED' && booking.getDateRange().overlaps(dateRange);
+    });
+  }
+
+  //pending to test
+  addBooking(booking: Booking): void {
+    this.bookings.push(booking);
+  }
+
+  //pending to test
+  getBookings(): Booking[] {
+    return [...this.bookings];
   }
 }
